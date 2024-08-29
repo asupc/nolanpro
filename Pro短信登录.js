@@ -15,12 +15,9 @@ let Phone = process.env.ProSMS_Phone;
 let VerifyCode = process.env.ProSMS_VerifyCode;
 let user_id = process.env.user_id;
 let CardCode = process.env.ProSMS_CardCode;
-let JINGXIANGZHI = (process.env.JINGXIANGZHI || 0) * 1;
-
 
 let ADD_COOKIE_USE_SCORE = (process.env.ADD_COOKIE_USE_SCORE || 0) * 1;
 
-let JINGXIANGZHI_MSG = process.env.JINGXIANGZHI_MSG || "您的京享值过低，无法自动完成任务！";
 
 let CARD_CODE_MESSAGE = "本次登录需要提供您绑定身份证前2后4位认证，如：110324，如最后一位为X请输入大写。";
 if (process.env.CARD_CODE_MESSAGE) {
@@ -35,7 +32,7 @@ var cookies = [];
 const { sendNotify, getUserInfo, uuid, api, deductionIntegral, finshStepCommandTask
 } = require('./quantum');
 
-const { QueryJDUserInfo, addOrUpdateJDCookie, GetJDUserInfoUnion
+const { QueryJDUserInfo, addOrUpdateJDCookie, GetJDUserInfoUnion,checkAddJDCookie
 } = require('./jd_base');
 
 !(async () => {
@@ -97,62 +94,9 @@ const { QueryJDUserInfo, addOrUpdateJDCookie, GetJDUserInfoUnion
     for (let i = 0; i < cookies.length; i++) {
         var cookie = cookies[i];
         if (cookie) {
-            if (cookie.indexOf("pt_pin") < 0) {
-                cookie = cookie + "pt_pin=" + uuid(8) + ";"
-            }
-            cookie = cookie.replace(/[\r\n]/g, "");
-
-            var pt_key = null;
-            var pt_pin = null;
-            try {
-                pt_key = cookie.match(/pt_key=([^; ]+)(?=;?)/)[1]
-                pt_pin = cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1]
-            }
-            catch (e) {
-                console.log("CK： " + cookie + "格式不对，已跳过");
-                continue;
-            }
-            if (!pt_key || !pt_pin) {
-                continue;
-            }
-            user_id = cookie.match(/qq=([^; ]+)(?=;?)/)
-            if (user_id) {
-                user_id = user_id[1];
-            } else {
-                user_id = process.env.user_id;
-            }
-            //处理pt_pin中带中文的问题
-            var reg = new RegExp("[\\u4E00-\\u9FFF]+", "g");
-            if (reg.test(pt_pin)) {
-                pt_pin = encodeURI(pt_pin);
-            }
-            cookie = `pt_key=${pt_key};pt_pin=${pt_pin};`
-            let UserName = pt_pin
-            let UserName2 = decodeURI(UserName);
-            let nickName = UserName2;
-            var jdInfo = await QueryJDUserInfo(cookie);
-            if (ADD_COOKIE_USE_SCORE && ADD_COOKIE_USE_SCORE > 0) {
-                var result = await deductionIntegral(ADD_COOKIE_USE_SCORE)
-                if (result.Code != 200) {
-                    await sendNotify(result.Message);
-                    return false;
-                }
-            }
-            var jdInfo = await GetJDUserInfoUnion(cookie);
-
-            let msg = `提交成功！
-用户等级：${jdInfo.data.userInfo.baseInfo.levelName}
-京东昵称：${jdInfo.data.userInfo.baseInfo.nickname || nickName}
-剩余京豆：${jdInfo.data.assetInfo.beanNum}`
-
-            var temp = await addOrUpdateJDCookie(cookie, process.env.user_id, jdInfo.data.userInfo.baseInfo.nickname || nickName);
-            if (temp) {
-                msg += `\n当前权重：${temp.Weight}`
-            }
-            await sendNotify(msg);
+            await checkAddJDCookie(cookie);
         }
     }
-
     await finshStepCommandTask();
 })()
     .catch(async (e) => {
