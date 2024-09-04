@@ -16,7 +16,7 @@ const {
     sendNotify, api, sleep, serverAddres
 } = require('./quantum');
 
-const { ProWskey, GetJDUserInfoUnion, addOrUpdateJDCookie, addOrUpdateProWskey, checkAddJDCookie } = require('./jd_base');
+const { ProWskey, addOrUpdateProWskey, checkAddJDCookie } = require('./jd_base');
 
 var fs = require("fs");
 
@@ -28,14 +28,11 @@ let serverPath = ""
 let CommunicationUserName = process.env.CommunicationUserName;
 
 !(async () => {
-
     t = Date.now();
-
     if (!Pro_URL) {
         console.log("未配置Pro wskey 扫码服务地址，环境变量名称：Pro_URL");
         return false;
     }
-
     const body = await api({
         url: serverAddres + `api/SystemConfig`,
         method: 'get',
@@ -57,8 +54,6 @@ let CommunicationUserName = process.env.CommunicationUserName;
 
     var key = await GetQRKey()
     await GetQR(key)
-    // await JCommand(key)
-
     if (qrc) {
         do {
             await sleep(3000);
@@ -81,39 +76,39 @@ let CommunicationUserName = process.env.CommunicationUserName;
     console.log(e);
 });
 
-/**
- * 获取key
- */
-async function JCommand(key) {
+// /**
+//  * 获取key
+//  */
+// async function JCommand(key) {
 
-    var data = JSON.stringify({
-        "url": `https://cjhy-isv.isvjcloud.com/yunying/viewSpecialTopicPage/openAppPage?actlink=https://qr.m.jd.com/p?k=${key}`,
-        "title": "City-口令登录",
-        "img": ""
-    });
+//     var data = JSON.stringify({
+//         "url": `https://cjhy-isv.isvjcloud.com/yunying/viewSpecialTopicPage/openAppPage?actlink=https://qr.m.jd.com/p?k=${key}`,
+//         "title": "City-口令登录",
+//         "img": ""
+//     });
 
-    try {
-        var config = {
-            method: 'POST',
-            url: "http://api.nolanstore.cc/JCommand",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: data
-        };
-        var response = await api(config);
-        var result = JSON.parse(response.body);
-        await sendNotify(`复制口令：${result.data}
-步骤：京东APP确认登录
-机器人回复：添加成功，才算挂机成功`)
-        qrc = result
-        return result;
-    }
-    catch (e) {
-        await JCommand(key)
-        return
-    }
-}
+//     try {
+//         var config = {
+//             method: 'POST',
+//             url: "http://api.nolanstore.cc/JCommand",
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: data
+//         };
+//         var response = await api(config);
+//         var result = JSON.parse(response.body);
+//         await sendNotify(`复制口令：${result.data}
+// 步骤：京东APP确认登录
+// 机器人回复：添加成功，才算挂机成功`)
+//         qrc = result
+//         return result;
+//     }
+//     catch (e) {
+//         await JCommand(key)
+//         return
+//     }
+// }
 
 async function GetQR(key) {
     QRCode.toDataURL(`https://qr.m.jd.com/p?k=${key}`)

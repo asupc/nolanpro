@@ -8,7 +8,6 @@
  * 
  */
 
-
 let ADD_COOKIE = process.env.ADD_COOKIE || "";
 let ProStart = process.env.ProStart;
 let Phone = process.env.ProSMS_Phone;
@@ -29,11 +28,10 @@ let Pro_URL = process.env.Pro_URL;
 let Pro_BotApiToken = process.env.Pro_BotApiToken;
 
 var cookies = [];
-const { sendNotify, getUserInfo, uuid, api, deductionIntegral, finshStepCommandTask
+const { sendNotify, getUserInfo, uuid, api, finshStepCommandTask
 } = require('./quantum');
 
-const { QueryJDUserInfo, addOrUpdateJDCookie, GetJDUserInfoUnion,checkAddJDCookie
-} = require('./jd_base');
+const { checkAddJDCookie } = require('./jd_base');
 
 !(async () => {
     user = (await getUserInfo()) || {};

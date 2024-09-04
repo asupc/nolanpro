@@ -6,7 +6,7 @@ if (!process.env.NO_CK_NOTIFY) {
     process.env.NO_CK_NOTIFY = "您没有提交CK。请按照教程获取CK发送给机器人。";
 }
 
-const { disableEnvs, deductionIntegral, getUserInfo, sendNotify, addEnvs, allEnvs, api, getCustomData, updateCustomData, addCustomData, addOrUpdateCustomDataTitle
+const { uuid, deductionIntegral, getUserInfo, sendNotify, addEnvs, allEnvs, api, getCustomData, updateCustomData, addCustomData, addOrUpdateCustomDataTitle
 } = require('./quantum');
 
 const wskeyCustomDataType = "wskey_record";
