@@ -66,7 +66,7 @@ const { checkAddJDCookie } = require('./jd_base');
             }
         }
         else if (Phone && VerifyCode) {
-            var message = `您的验证码:${VerifyCode}，正在验证`
+            var message = `您的验证：【${VerifyCode}】，正在验证`
             await sendNotify(message);
             console.log(message)
             var result = await verifyCode();
